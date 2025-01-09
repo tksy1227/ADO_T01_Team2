@@ -25,6 +25,22 @@ jobs:
         with:
           python-version: 3.8.x
 
+      - name: Debug Environment Variables
+        run: |
+          echo "SNOWFLAKE_ACCOUNT: $SNOWFLAKE_ACCOUNT"
+          echo "SNOWFLAKE_USER: $SNOWFLAKE_USER"
+          echo "SNOWFLAKE_ROLE: $SNOWFLAKE_ROLE"
+          echo "SNOWFLAKE_WAREHOUSE: $SNOWFLAKE_WAREHOUSE"
+          echo "SNOWFLAKE_DATABASE: $SNOWFLAKE_DATABASE"
+          echo "SNOWFLAKE_SCHEMA: $SNOWFLAKE_SCHEMA"
+        env:
+          SNOWFLAKE_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
+          SNOWFLAKE_USER: ${{ secrets.SNOWFLAKE_USER }}
+          SNOWFLAKE_ROLE: ${{ secrets.SNOWFLAKE_ROLE }}
+          SNOWFLAKE_WAREHOUSE: ${{ secrets.SNOWFLAKE_WAREHOUSE }}
+          SNOWFLAKE_DATABASE: ${{ secrets.SNOWFLAKE_DATABASE }}
+          SNOWFLAKE_SCHEMA: ${{ secrets.SNOWFLAKE_SCHEMA }}
+
       - name: Run schemachange
         env:
           SNOWFLAKE_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
@@ -39,6 +55,14 @@ jobs:
           python --version
           echo "Step 1: Installing schemachange"
           pip install schemachange
-          
+
           echo "Step 2: Running schemachange"
-          schemachange -f $GITHUB_WORKSPACE/migrations -a $SNOWFLAKE_ACCOUNT -u $SNOWFLAKE_USER -r $SNOWFLAKE_ROLE -w $SNOWFLAKE_WAREHOUSE -d $SNOWFLAKE_DATABASE -s $SNOWFLAKE_SCHEMA -c $SNOWFLAKE_DATABASE.SCHEMACHANGE.CHANGE_HISTORY --create-change-history-table
+          schemachange -f $GITHUB_WORKSPACE/migrations \
+                      -a $SNOWFLAKE_ACCOUNT \
+                      -u $SNOWFLAKE_USER \
+                      -r $SNOWFLAKE_ROLE \
+                      -w $SNOWFLAKE_WAREHOUSE \
+                      -d $SNOWFLAKE_DATABASE \
+                      -s $SNOWFLAKE_SCHEMA \
+                      -c $SNOWFLAKE_DATABASE.SCHEMACHANGE.CHANGE_HISTORY \
+                      --create-change-history-table
