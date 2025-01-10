@@ -1,34 +1,38 @@
 name: Deploy Snowpark Apps
 
-# Controls when the action will run. 
+# Controls when the action will run.
 on:
   push:
     branches:
       - main
 
-  # Allows you to run this workflow manually from the Actions tab
+  # Allows you to run this workflow manually from the Actions tab.
   workflow_dispatch:
 
+  # Schedule (optional)
   schedule:
-    - cron: "*/5 * * * *"  # Runs every 5 minutes
-    
+    - cron: "*/5 * * * *"  # Runs every 5 minutes (UTC time)
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      # Step 1: Check out the repository.
       - name: Checkout repository
         uses: actions/checkout@v3
 
+      # Step 2: Set up Python.
       - name: Setup Python 3.10
         uses: actions/setup-python@v4
         with:
           python-version: '3.10'
 
+      # Step 3: Install required Python packages.
       - name: Install Python packages
         run: pip install -r requirements.txt
 
+      # Step 4: Deploy Snowpark apps.
       - name: Deploy Snowpark apps
         env:
           SNOWFLAKE_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
@@ -38,3 +42,11 @@ jobs:
           SNOWFLAKE_WAREHOUSE: ${{ secrets.SNOWFLAKE_WAREHOUSE }}
           SNOWFLAKE_DATABASE: ${{ secrets.SNOWFLAKE_DATABASE }}
         run: python deploy_snowpark_apps.py $GITHUB_WORKSPACE
+
+      # Step 5: Send Slack notification (add this).
+      - name: Notify Slack
+        uses: slackapi/slack-github-action@v1.24.0
+        with:
+          payload: '{"text":"Deployment completed successfully!"}'
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
