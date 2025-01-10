@@ -42,11 +42,3 @@ jobs:
           SNOWFLAKE_WAREHOUSE: ${{ secrets.SNOWFLAKE_WAREHOUSE }}
           SNOWFLAKE_DATABASE: ${{ secrets.SNOWFLAKE_DATABASE }}
         run: python deploy_snowpark_apps.py $GITHUB_WORKSPACE
-
-      # Step 5: Send Slack notification (add this).
-      - name: Notify Slack
-        uses: slackapi/slack-github-action@v1.24.0
-        with:
-          payload: '{"text":"Deployment completed successfully!"}'
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
