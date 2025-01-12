@@ -4,21 +4,20 @@ name: Deploy Snowpark Apps
 on:
   push:
     branches:
-      - main
-
-  # Allows you to run this workflow manually from the Actions tab.
-  workflow_dispatch:
-
-  # Schedule (optional)
+      - main  # Trigger on push to the main branch
+  pull_request:
+    branches:
+      - main  # Trigger on pull requests targeting the main branch
+  workflow_dispatch:  # Allows manual triggering from GitHub UI
   schedule:
-    - cron: "*/5 * * * *"  # Runs every 5 minutes (UTC time)
+    - cron: "*/5 * * * *"  # Optionally, run every 5 minutes (UTC time)
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest  # Runner environment for executing the job
 
     steps:
-      # Step 1: Check out the repository.
+      # Step 1: Checkout the repository.
       - name: Checkout repository
         uses: actions/checkout@v3
 
@@ -29,10 +28,32 @@ jobs:
           python-version: '3.10'
 
       # Step 3: Install required Python packages.
-      - name: Install Python packages
-        run: pip install -r requirements.txt
+      - name: Install dependencies
+        run: |
+          pip install snowflake-connector-python
+          pip install snowflake-snowpark-python
+          pip install papermill  # For running Jupyter notebooks
 
-      # Step 4: Deploy Snowpark apps.
+      # Step 4: Set environment variables for Snowflake connection.
+      - name: Set up Snowflake environment variables
+        run: |
+          echo "SNOWFLAKE_ACCOUNT=${{ secrets.SNOWFLAKE_ACCOUNT }}" >> $GITHUB_ENV
+          echo "SNOWFLAKE_USER=${{ secrets.SNOWFLAKE_USER }}" >> $GITHUB_ENV
+          echo "SNOWFLAKE_PASSWORD=${{ secrets.SNOWFLAKE_PASSWORD }}" >> $GITHUB_ENV
+          echo "SNOWFLAKE_DATABASE=${{ secrets.SNOWFLAKE_DATABASE }}" >> $GITHUB_ENV
+          echo "SNOWFLAKE_WAREHOUSE=${{ secrets.SNOWFLAKE_WAREHOUSE }}" >> $GITHUB_ENV
+
+      # Step 5: Run the Snowpark Jupyter notebook (if needed).
+      #- name: Run Snowpark Jupyter notebook
+       # run: |
+        #  papermill notebooks/snowpark_notebook.ipynb output_notebook.ipynb  # Adjust the notebook path as needed
+
+      # Step 6: Alternatively, run Python script for Snowpark logic.
+      #- name: Execute Python script for Snowpark logic
+       # run: |
+        #  python snowpark_scripts/deploy_snowpark_apps.py  # Or wherever your script is located
+
+      # Step 7: Optionally, deploy the Snowpark apps or perform additional actions
       - name: Deploy Snowpark apps
         env:
           SNOWFLAKE_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
@@ -41,4 +62,5 @@ jobs:
           SNOWFLAKE_ROLE: ${{ secrets.SNOWFLAKE_ROLE }}
           SNOWFLAKE_WAREHOUSE: ${{ secrets.SNOWFLAKE_WAREHOUSE }}
           SNOWFLAKE_DATABASE: ${{ secrets.SNOWFLAKE_DATABASE }}
-        run: python deploy_snowpark_apps.py $GITHUB_WORKSPACE
+        run: |
+          python deploy_snowpark_apps.py $GITHUB_WORKSPACE
