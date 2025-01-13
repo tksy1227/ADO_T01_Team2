@@ -33,6 +33,10 @@ jobs:
           pip install snowflake-connector-python
           pip install snowflake-snowpark-python
           pip install papermill  # For running Jupyter notebooks
+          pip install streamlit  # Install Streamlit
+          pip install ipykernel  # Ensure Jupyter can find the kernel
+          python -m ipykernel install --user --name=streamlit --display-name "Streamlit"
+
 
       # Step 4: Set environment variables for Snowflake connection.
       - name: Set up Snowflake environment variables
@@ -46,7 +50,9 @@ jobs:
       # Step 5: Run the Snowpark Jupyter notebook (if needed).
       - name: Run Snowpark Jupyter notebook
         run: |
-          papermill notebook/snowpark_notebook.ipynb output_notebook.ipynb  # Adjust the notebook path as needed
+          papermill notebook/snowpark_notebook.ipynb output_notebook.ipynb \
+          -k python3  # Specify the kernel if needed (replace 'python3' with the appropriate kernel)
+
 
       # Step 6: Alternatively, run Python script for Snowpark logic.
       #- name: Execute Python script for Snowpark logic
