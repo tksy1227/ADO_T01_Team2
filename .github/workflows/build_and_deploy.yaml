@@ -44,9 +44,9 @@ jobs:
           echo "SNOWFLAKE_WAREHOUSE=${{ secrets.SNOWFLAKE_WAREHOUSE }}" >> $GITHUB_ENV
 
       # Step 5: Run the Snowpark Jupyter notebook (if needed).
-      #- name: Run Snowpark Jupyter notebook
-       # run: |
-        #  papermill notebooks/snowpark_notebook.ipynb output_notebook.ipynb  # Adjust the notebook path as needed
+      - name: Run Snowpark Jupyter notebook
+        run: |
+          papermill notebooks/snowpark_notebook.ipynb output_notebook.ipynb  # Adjust the notebook path as needed
 
       # Step 6: Alternatively, run Python script for Snowpark logic.
       #- name: Execute Python script for Snowpark logic
