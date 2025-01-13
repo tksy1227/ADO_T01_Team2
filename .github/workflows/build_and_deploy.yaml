@@ -9,8 +9,8 @@ on:
     branches:
       - main  # Trigger on pull requests targeting the main branch
   workflow_dispatch:  # Allows manual triggering from GitHub UI
-  schedule:
-    - cron: "*/5 * * * *"  # Optionally, run every 5 minutes (UTC time)
+  #schedule:
+    #- cron: "*/5 * * * *"  # Optionally, run every 5 minutes (UTC time)
 
 jobs:
   deploy:
