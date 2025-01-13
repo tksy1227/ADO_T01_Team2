@@ -46,7 +46,7 @@ jobs:
       # Step 5: Run the Snowpark Jupyter notebook (if needed).
       - name: Run Snowpark Jupyter notebook
         run: |
-          papermill notebooks/snowpark_notebook.ipynb output_notebook.ipynb  # Adjust the notebook path as needed
+          papermill notebook/snowpark_notebook.ipynb output_notebook.ipynb  # Adjust the notebook path as needed
 
       # Step 6: Alternatively, run Python script for Snowpark logic.
       #- name: Execute Python script for Snowpark logic
