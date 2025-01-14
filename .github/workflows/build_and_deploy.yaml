@@ -37,7 +37,6 @@ jobs:
           pip install ipykernel  # Install Jupyter kernel manager
           python -m ipykernel install --user --name=streamlit --display-name "Streamlit"
 
-      # Step 4: Set environment variables for Snowflake connection.
       - name: Set up Snowflake environment variables
         run: |
           echo "SNOWFLAKE_ACCOUNT=${{ secrets.SNOWFLAKE_ACCOUNT }}" >> $GITHUB_ENV
