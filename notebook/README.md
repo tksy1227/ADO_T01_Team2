@@ -1,5 +1,6 @@
 ABOUT FOLDER
 -----------------------------------
+### IN PROGRESS ###
 This folder contains the jupyter notebook file that contains the python code that has been run in Snowpark to further transform the data, orchestrate more jobs in the CI/CD
 pipeline.
 
