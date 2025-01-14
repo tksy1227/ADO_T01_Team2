@@ -49,7 +49,7 @@ jobs:
       # Step 5: Run the Snowpark Jupyter notebook (if needed).
       - name: Run Snowpark Jupyter notebook
         run: |
-          papermill notebook/snowpark_notebook.ipynb output_notebook.ipynb -k streamlit  # Specify the kernel if needed
+          papermill notebook/snowpark_notebook.ipynb output_notebook.ipynb -k streamlit
 
       # Step 6: Alternatively, run Python script for Snowpark logic.
       # - name: Execute Python script for Snowpark logic
