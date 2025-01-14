@@ -42,8 +42,10 @@ jobs:
           echo "SNOWFLAKE_ACCOUNT=${{ secrets.SNOWFLAKE_ACCOUNT }}" >> $GITHUB_ENV
           echo "SNOWFLAKE_USER=${{ secrets.SNOWFLAKE_USER }}" >> $GITHUB_ENV
           echo "SNOWFLAKE_PASSWORD=${{ secrets.SNOWFLAKE_PASSWORD }}" >> $GITHUB_ENV
-          echo "SNOWFLAKE_DATABASE=${{ secrets.SNOWFLAKE_DATABASE }}" >> $GITHUB_ENV
           echo "SNOWFLAKE_WAREHOUSE=${{ secrets.SNOWFLAKE_WAREHOUSE }}" >> $GITHUB_ENV
+          echo "SNOWFLAKE_DATABASE=${{ secrets.SNOWFLAKE_DATABASE }}" >> $GITHUB_ENV
+          echo "SNOWFLAKE_SCHEMA=${{ secrets.SNOWFLAKE_SCHEMA }}" >> $GITHUB_ENV
+          echo "SNOWFLAKE_ROLE=${{ secrets.SNOWFLAKE_ROLE }}" >> $GITHUB_ENV
 
       # Step 5: Run the Snowpark Jupyter notebook (if needed).
       - name: Run Snowpark Jupyter notebook
