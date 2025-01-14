@@ -1,2 +1,6 @@
+ipykernel
+nbconvert
+pre-commit
 snowflake-snowpark-python[pandas]
 snowflake-cli-labs
+xgboost
