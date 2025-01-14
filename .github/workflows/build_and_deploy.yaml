@@ -51,7 +51,7 @@ jobs:
           SNOWFLAKE_DATABASE: ${{ secrets.SNOWFLAKE_DATABASE }}
           SNOWFLAKE_SCHEMA: ${{ secrets.SNOWFLAKE_SCHEMA }}
         run: |
-          python deploy_snowpark_apps.py
+          python run.py
 
       - name: Set up Snowflake environment variables
         run: |
@@ -72,3 +72,5 @@ jobs:
           echo "SNOWFLAKE_DATABASE=$SNOWFLAKE_DATABASE"
           echo "SNOWFLAKE_SCHEMA=$SNOWFLAKE_SCHEMA"
           echo "SNOWFLAKE_ROLE=$SNOWFLAKE_ROLE"
+
+# try to run without the other deploy py file first
