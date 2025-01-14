@@ -1,5 +1,12 @@
+ipykernel
+nbconvert
+pre-commit
 snowflake-snowpark-python[pandas]
 snowflake-cli-labs
+<<<<<<< HEAD
 snowflake-connector-python
 snowflake-snowpark-python
 jupyterlab
+=======
+xgboost
+>>>>>>> 3ec3e4186f36501b07cc6636778b3189353e716f

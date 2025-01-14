@@ -9,9 +9,12 @@ on:
     branches:
       - main  # Trigger on pull requests targeting the main branch
   workflow_dispatch:  # Allows manual triggering from GitHub UI
-  schedule:
-    - cron: "*/5 * * * *"  # Optionally, run every 5 minutes (UTC time)
+  #schedule:
+    #- cron: "*/5 * * * *"  # Optionally, run every 5 minutes (UTC time)
 
+permissions:
+  contents: need
+  
 jobs:
   deploy:
     runs-on: ubuntu-latest  # Runner environment for executing the job
@@ -22,49 +25,52 @@ jobs:
         uses: actions/checkout@v3
 
       # Step 2: Set up Python.
-      - name: Setup Python 3.10
-        uses: actions/setup-python@v4
+      - name: Setup Python 3.8 # change this to python 3.8 for the connection
+        uses: actions/setup-python@v3
         with:
-          python-version: '3.10'
+          python-version: '3.8'
 
       # Step 3: Install required Python packages.
       - name: Install dependencies
         run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; f
+          
           pip install snowflake-connector-python
           pip install snowflake-snowpark-python
           pip install papermill  # For running Jupyter notebooks
           pip install streamlit  # Install Streamlit for the kernel
           pip install ipykernel  # Install Jupyter kernel manager
-          python -m ipykernel install --user --name=streamlit --display-name "Streamlit"
+       #   python -m ipykernel install --user --name=streamlit --display-name "Streamlit"
 
-      # Step 4: Set environment variables for Snowflake connection.
+      - name: Execute Jupyter Notebook
+        env:
+          SNOWFLAKE_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
+          SNOWFLAKE_USER: ${{ secrets.SNOWFLAKE_USER }}
+          SNOWFLAKE_PASSWORD: ${{ secrets.SNOWFLAKE_PASSWORD }}
+          SNOWFLAKE_DATABASE: ${{ secrets.SNOWFLAKE_DATABASE }}
+          SNOWFLAKE_SCHEMA: ${{ secrets.SNOWFLAKE_SCHEMA }}
+        run: |
+          python run.py
+
       - name: Set up Snowflake environment variables
         run: |
           echo "SNOWFLAKE_ACCOUNT=${{ secrets.SNOWFLAKE_ACCOUNT }}" >> $GITHUB_ENV
           echo "SNOWFLAKE_USER=${{ secrets.SNOWFLAKE_USER }}" >> $GITHUB_ENV
           echo "SNOWFLAKE_PASSWORD=${{ secrets.SNOWFLAKE_PASSWORD }}" >> $GITHUB_ENV
-          echo "SNOWFLAKE_DATABASE=${{ secrets.SNOWFLAKE_DATABASE }}" >> $GITHUB_ENV
           echo "SNOWFLAKE_WAREHOUSE=${{ secrets.SNOWFLAKE_WAREHOUSE }}" >> $GITHUB_ENV
-
-      # Step 5: Run the Snowpark Jupyter notebook (if needed).
-      - name: Run Snowpark Jupyter notebook
+          echo "SNOWFLAKE_DATABASE=${{ secrets.SNOWFLAKE_DATABASE }}" >> $GITHUB_ENV
+          echo "SNOWFLAKE_SCHEMA=${{ secrets.SNOWFLAKE_SCHEMA }}" >> $GITHUB_ENV
+          echo "SNOWFLAKE_ROLE=${{ secrets.SNOWFLAKE_ROLE }}" >> $GITHUB_ENV
+    
+      - name: Debug environment variables
         run: |
-          papermill notebook/snowpark_notebook.ipynb output_notebook.ipynb -k streamlit  # Specify the kernel if needed
+          echo "SNOWFLAKE_ACCOUNT=$SNOWFLAKE_ACCOUNT"
+          echo "SNOWFLAKE_USER=$SNOWFLAKE_USER"
+          echo "SNOWFLAKE_PASSWORD=$SNOWFLAKE_PASSWORD"
+          echo "SNOWFLAKE_WAREHOUSE=$SNOWFLAKE_WAREHOUSE"
+          echo "SNOWFLAKE_DATABASE=$SNOWFLAKE_DATABASE"
+          echo "SNOWFLAKE_SCHEMA=$SNOWFLAKE_SCHEMA"
+          echo "SNOWFLAKE_ROLE=$SNOWFLAKE_ROLE"
 
-      # Step 6: Alternatively, run Python script for Snowpark logic.
-      # - name: Execute Python script for Snowpark logic
-      #   run: |
-      #     python snowpark_scripts/deploy_snowpark_apps.py  # Or wherever your script is located
-
-      # Step 7: Optionally, deploy the Snowpark apps or perform additional actions
-      - name: Deploy Snowpark apps
-        env:
-          SNOWFLAKE_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
-          SNOWFLAKE_USER: ${{ secrets.SNOWFLAKE_USER }}
-          SNOWFLAKE_PASSWORD: ${{ secrets.SNOWFLAKE_PASSWORD }}
-          SNOWFLAKE_ROLE: ${{ secrets.SNOWFLAKE_ROLE }}
-          SNOWFLAKE_WAREHOUSE: ${{ secrets.SNOWFLAKE_WAREHOUSE }}
-          SNOWFLAKE_DATABASE: ${{ secrets.SNOWFLAKE_DATABASE }}
-        run: |
-          python deploy_snowpark_apps.py $GITHUB_WORKSPACE
-
+# try to run without the other deploy py file first
