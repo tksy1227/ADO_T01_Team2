@@ -39,14 +39,18 @@ jobs:
           sudo curl -sSL https://install.astronomer.io | sudo bash
           export PATH=$PATH:$HOME/.astro/bin
 
-      # Authenticate with Astronomer
       - name: Authenticate with Astronomer
         run: |
-          if [ "${{ env.ASTRO_API_TOKEN }}" == "" ]; then
-            echo "Missing ASTRO_API_TOKEN. Please provide it via workflow inputs or GitHub secrets."
-            exit 1
-          fi
-          astro login --token-login "${{ env.ASTRO_API_TOKEN }}"
+         if [ "${{ env.ASTRO_API_TOKEN }}" == "" ]; then
+         echo "Error: Missing ASTRO_API_TOKEN. Please provide a valid token."
+         exit 1
+         fi
+         echo "Authenticating with Astro..."
+         astro login --token-login "${{ env.ASTRO_API_TOKEN }}" || {
+         echo "Authentication failed. Please check your token."
+         exit 1
+         }
+
 
       # Set Astronomer Workspace
       - name: Set Astronomer Workspace
