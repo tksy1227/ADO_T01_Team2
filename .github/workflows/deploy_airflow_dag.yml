@@ -31,14 +31,15 @@ jobs:
         run: |
           sudo curl -sSL https://install.astronomer.io | sudo bash
           echo "Adding Astronomer CLI to PATH"
-          export PATH=$PATH:$HOME/.astro/bin  # Add to the PATH for the current step
-          echo "Astronomer CLI installed, checking version..."
-          which astro  # Check the location of the 'astro' binary
-          astro version  # Corrected version command
+          export PATH=$PATH:$HOME/.astro/bin
+
+      - name: Initialize Astro project
+        run: |
+          astro dev init
 
       - name: Deploy DAG
         run: |
-          export PATH=$PATH:$HOME/.astro/bin  # Add Astronomer CLI to the PATH explicitly here too
-          astro deploy
+          cd my-astro-project  # Replace with the path to your Astronomer project
+          astro deploy --deployment-name "<your-deployment-name>"  # Optionally specify deployment
         env:
           ASTRO_API_KEY: "eyJhbGciOiJSUzI1NiIsImtpZCI6ImNsb2Q0aGtqejAya3AwMWozdWNqbzJwOHIiLCJ0eXAiOiJKV1QifQ.eyJhcGlUb2tlbklkIjoiY201eXd0YjV2MDczOTAxbmM0d2FwOTUzMyIsImF1ZCI6ImFzdHJvbm9tZXItZWUiLCJpYXQiOjE3MzcwMDY0ODYsImlzQXN0cm9ub21lckdlbmVyYXRlZCI6dHJ1ZSwiaXNJbnRlcm5hbCI6ZmFsc2UsImlzcyI6Imh0dHBzOi8vYXBpLmFzdHJvbm9tZXIuaW8iLCJraWQiOiJjbG9kNGhranowMmtwMDFqM3Vjam8ycDhyIiwicGVybWlzc2lvbnMiOlsiYXBpVG9rZW5JZDpjbTV5d3RiNXYwNzM5MDFuYzR3YXA5NTMzIiwiZGVwbG95bWVudElkOmNtNXl1OTJmNjA2cnowMWtoNm91NmZndmIiLCJvcmdhbml6YXRpb25JZDpjbTV3OGRobDcxNHpxMDFsbWlqbWJxZ3JuIiwib3JnU2hvcnROYW1lOmNtNXc4ZGhsNzE0enEwMWxtaWptYnFncm4iLCJ3b3Jrc3BhY2VJZDpjbTV3OGRqMTAxNHp4MDFsbXphazR4MTI5Il0sInNjb3BlIjoiYXBpVG9rZW5JZDpjbTV5d3RiNXYwNzM5MDFuYzR3YXA5NTMzIGRlcGxveW1lbnRJZDpjbTV5dTkyZjYwNnJ6MDFraDZvdTZmZ3ZiIG9yZ2FuaXphdGlvbklkOmNtNXc4ZGhsNzE0enEwMWxtaWptYnFncm4gb3JnU2hvcnROYW1lOmNtNXc4ZGhsNzE0enEwMWxtaWptYnFncm4iLCJzdWIiOiJjbTV3OGN0bmgwZWVjMDFsaHZwaDhmeGFzIiwidmVyc2lvbiI6ImNtNXl3dGI1djA3MzgwMW5jeHEyd24xMmwifQ.rONseJ2LipMeKDC7mJJir6Askgr1TxtoU1JHAArt2dtuhFUUPyoTUSGfvB7rl1PtlH8U9aOFvXPOa9RFy8K4KGD9ybEnqedZtpVXTHBug2lNLIT6JZmcJpgJBAc4WuRDe2G5wypHFX1sDVqg7N7Y6zir6HYDMBHPGcks53WtbAZ-JiVmpyfXgfwrstUD44TsdVgl2tEnMFotMEDk3Eo-FIst6gMXRXSiEwm08tmFAV0K2cLD83VnR3sCuMCkIfNmaGEgsW1Y1PGKt5K0_bo832WDIbd6z0Ci0n1QaL2wyFUULWiKhHrzsyHPwgGdV5TbRIHgLOzt7bag7dYeWoA92w"
