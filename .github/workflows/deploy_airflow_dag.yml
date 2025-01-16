@@ -30,7 +30,8 @@ jobs:
       - name: Install Astronomer CLI
         run: |
           curl -sSL https://install.astronomer.io | bash
-          export PATH=$PATH:$HOME/.astro/bin
+          echo "$HOME/.astro/bin" >> $GITHUB_PATH  # Add to PATH permanently for the workflow
+
 
       - name: Deploy DAG
         run: |
