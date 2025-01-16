@@ -29,12 +29,12 @@ jobs:
 
       - name: Install Astronomer CLI
         run: |
-          sudo curl -sSL https://install.astronomer.io | sudo bash  # Add sudo to the installation command
+          sudo curl -sSL https://install.astronomer.io | sudo bash
           echo "Adding Astronomer CLI to PATH"
           export PATH=$PATH:$HOME/.astro/bin  # Add to the PATH for the current step
           echo "Astronomer CLI installed, checking version..."
           which astro  # Check the location of the 'astro' binary
-          astro --version  # Confirm the CLI version is correctly installed
+          astro version  # Corrected version command
 
       - name: Deploy DAG
         run: |
