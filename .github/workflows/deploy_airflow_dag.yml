@@ -41,15 +41,14 @@ jobs:
 
       - name: Authenticate with Astronomer
         run: |
-         if [ "${{ env.ASTRO_API_TOKEN }}" == "" ]; then
-         echo "Error: Missing ASTRO_API_TOKEN. Please provide a valid token."
-         exit 1
-         fi
-         echo "Authenticating with Astro..."
-         astro login --token-login "${{ env.ASTRO_API_TOKEN }}" || {
-         echo "Authentication failed. Please check your token."
-         exit 1
-         }
+          if [ "${{ secrets.ASTRO_API_TOKEN }}" == "" ]; then
+          echo "Error: ASTRO_API_TOKEN is missing. Please set it in GitHub Secrets."
+          exit 1
+          fi
+          astro login --token-login "${{ secrets.ASTRO_API_TOKEN }}" || {
+          echo "Authentication failed. Please check your token and permissions."
+          exit 1
+          }
 
 
       # Set Astronomer Workspace
