@@ -46,7 +46,7 @@ jobs:
             echo "Missing ASTRO_API_TOKEN. Please provide it via workflow inputs or GitHub secrets."
             exit 1
           fi
-          echo "${{ env.ASTRO_API_TOKEN }}" | astro login --token
+          astro login --token-login "${{ env.ASTRO_API_TOKEN }}"
 
       # Set Astronomer Workspace
       - name: Set Astronomer Workspace
