@@ -1,7 +1,7 @@
 ipykernel
 nbconvert
 pre-commit
-snowflake-snowpark-python[pandas]==3.8.10
+snowflake-snowpark-python[pandas]
 snowflake-cli-labs
 jupyterlab
-xgboost==3.8.10
+xgboost
