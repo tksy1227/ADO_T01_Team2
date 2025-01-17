@@ -13,8 +13,8 @@ on:
     #- cron: "*/5 * * * *"  # Optionally, run every 5 minutes (UTC time)
 
 permissions:
-  contents: need
-  
+  contents: read
+
 jobs:
   deploy:
     runs-on: ubuntu-latest  # Runner environment for executing the job
@@ -25,7 +25,7 @@ jobs:
         uses: actions/checkout@v3
 
       # Step 2: Set up Python.
-      - name: Setup Python 3.8 # change this to python 3.8 for the connection
+      - name: Setup Python 3.8
         uses: actions/setup-python@v3
         with:
           python-version: '3.8'
@@ -34,15 +34,13 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          if [ -f requirements.txt ]; then pip install -r requirements.txt; f
-          
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
           pip install snowflake-connector-python
           pip install snowflake-snowpark-python
-          pip install papermill  # For running Jupyter notebooks
-          pip install streamlit  # Install Streamlit for the kernel
-          pip install ipykernel  # Install Jupyter kernel manager
-       #   python -m ipykernel install --user --name=streamlit --display-name "Streamlit"
+          pip install nbconvert  # For executing Jupyter notebooks
+          pip install jupyter
 
+      # Step 4: Execute Jupyter Notebook without saving output.
       - name: Execute Jupyter Notebook
         env:
           SNOWFLAKE_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
@@ -51,26 +49,4 @@ jobs:
           SNOWFLAKE_DATABASE: ${{ secrets.SNOWFLAKE_DATABASE }}
           SNOWFLAKE_SCHEMA: ${{ secrets.SNOWFLAKE_SCHEMA }}
         run: |
-          python dpeploy_snowpark_apps.py
-
-      - name: Set up Snowflake environment variables
-        run: |
-          echo "SNOWFLAKE_ACCOUNT=${{ secrets.SNOWFLAKE_ACCOUNT }}" >> $GITHUB_ENV
-          echo "SNOWFLAKE_USER=${{ secrets.SNOWFLAKE_USER }}" >> $GITHUB_ENV
-          echo "SNOWFLAKE_PASSWORD=${{ secrets.SNOWFLAKE_PASSWORD }}" >> $GITHUB_ENV
-          echo "SNOWFLAKE_WAREHOUSE=${{ secrets.SNOWFLAKE_WAREHOUSE }}" >> $GITHUB_ENV
-          echo "SNOWFLAKE_DATABASE=${{ secrets.SNOWFLAKE_DATABASE }}" >> $GITHUB_ENV
-          echo "SNOWFLAKE_SCHEMA=${{ secrets.SNOWFLAKE_SCHEMA }}" >> $GITHUB_ENV
-          echo "SNOWFLAKE_ROLE=${{ secrets.SNOWFLAKE_ROLE }}" >> $GITHUB_ENV
-    
-      - name: Debug environment variables
-        run: |
-          echo "SNOWFLAKE_ACCOUNT=$SNOWFLAKE_ACCOUNT"
-          echo "SNOWFLAKE_USER=$SNOWFLAKE_USER"
-          echo "SNOWFLAKE_PASSWORD=$SNOWFLAKE_PASSWORD"
-          echo "SNOWFLAKE_WAREHOUSE=$SNOWFLAKE_WAREHOUSE"
-          echo "SNOWFLAKE_DATABASE=$SNOWFLAKE_DATABASE"
-          echo "SNOWFLAKE_SCHEMA=$SNOWFLAKE_SCHEMA"
-          echo "SNOWFLAKE_ROLE=$SNOWFLAKE_ROLE"
-
-# try to run without the other deploy py file first
+          jupyter nbconvert --to notebook --execute notebook/snowpark_notebook.ipynb --stdout > /dev/null
