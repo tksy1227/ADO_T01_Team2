@@ -1,0 +1,65 @@
+
+--overview of the table
+select * from sales_invoicelines
+
+-- 1. Check for NULL values in the primary key
+SELECT *
+FROM SALES_INVOICELINES
+WHERE INVOICELINEID IS NULL;
+
+
+-- 2. Check for uniqueness of unique columns
+SELECT _, COUNT(*)
+FROM SALES_INVOICELINES
+GROUP BY _
+HAVING COUNT(*) > 1;
+--If query returns with no results, it means that the column is unique (no duplicate values)
+--since this table doesnt have any unique columns, this query was not used
+
+--3. Checking of NULL values
+-- Null value checks for numerical columns in SALES_INVOICELINES
+SELECT 
+    COUNT(CASE WHEN INVOICEID IS NULL THEN 1 END) AS count_INVOICEID_NULL,
+    COUNT(CASE WHEN STOCKITEMID IS NULL THEN 1 END) AS count_STOCKITEMID_NULL,
+    COUNT(CASE WHEN PACKAGETYPEID IS NULL THEN 1 END) AS count_PACKAGETYPEID_NULL,
+    COUNT(CASE WHEN QUANTITY IS NULL THEN 1 END) AS count_QUANTITY_NULL,
+    COUNT(CASE WHEN UNITPRICE IS NULL THEN 1 END) AS count_UNITPRICE_NULL,
+    COUNT(CASE WHEN TAXRATE IS NULL THEN 1 END) AS count_TAXRATE_NULL,
+    COUNT(CASE WHEN TAXAMOUNT IS NULL THEN 1 END) AS count_TAXAMOUNT_NULL,
+    COUNT(CASE WHEN LINEPROFIT IS NULL THEN 1 END) AS count_LINEPROFIT_NULL,
+    COUNT(CASE WHEN EXTENDEDPRICE IS NULL THEN 1 END) AS count_EXTENDEDPRICE_NULL
+FROM KN_LOGISTICS.SNOWSQL.SALES_INVOICELINES;
+
+// Null value checks for all columns (only varchar data type columns)
+SELECT
+    SUM(CASE WHEN DESCRIPTION = 'NULL' THEN 1 ELSE 0 END) AS NULL_COUNT_DESCRIPTION
+FROM 
+    KN_LOGISTICS.SNOWSQL.SALES_INVOICELINES;
+
+-- 4. Validate consistent data types for primary and foreign keys
+-- Validate FK: PACKAGETYPEID in SALES_INVOICELINES
+SELECT DISTINCT sil.PACKAGETYPEID AS Invalid_PACKAGETYPEID
+FROM KN_LOGISTICS.SNOWSQL.SALES_INVOICELINES sil
+LEFT JOIN KN_LOGISTICS.SNOWSQL.WAREHOUSE_PACKAGETYPES wp
+    ON sil.PACKAGETYPEID = wp.PACKAGETYPEID
+WHERE wp.PACKAGETYPEID IS NULL;
+
+-- Validate FK: STOCKITEMID in SALES_INVOICELINES
+SELECT DISTINCT sil.STOCKITEMID AS Invalid_STOCKITEMID
+FROM KN_LOGISTICS.SNOWSQL.SALES_INVOICELINES sil
+LEFT JOIN KN_LOGISTICS.SNOWSQL.WAREHOUSE_STOCKITEMS ws
+    ON sil.STOCKITEMID = ws.STOCKITEMID
+WHERE ws.STOCKITEMID IS NULL;
+--If query/queries produce no results, it means that the primary and foreign keys have the same datatype
+
+
+--5. Check for duplicate rows in the table 
+-- check for duplicates in unique column in SALES_INVOICELINE
+SELECT INVOICELINEID, COUNT(*)
+FROM KN_LOGISTICS.SNOWSQL.SALES_INVOICELINES
+GROUP BY INVOICELINEID
+HAVING COUNT(*) > 1;
+--if query produces no results, there are no duplicate rows in the table
+
+
+
