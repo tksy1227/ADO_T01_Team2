@@ -1,0 +1,154 @@
+create or replace TABLE KN_LOGISTICS.SNOWSQL.APPLICATION_PEOPLE (
+	PERSONID NUMBER(38,0) NOT NULL,
+	FULLNAME VARCHAR(50),
+	PREFERREDNAME VARCHAR(50),
+	SEARCHNAME VARCHAR(101),
+	ISEMPLOYEE BOOLEAN,
+	ISSALESPERSON BOOLEAN,
+	constraint PK_APPLICATION_PEOPLE primary key (PERSONID)
+);
+
+ALTER TABLE KN_LOGISTICS.SNOWSQL.APPLICATION_PEOPLE
+ADD CONSTRAINT PK_APPLICATION_PEOPLE_PERSONID
+PRIMARY KEY (PERSONID);
+
+-----------------------------------------------------------------------------------------
+// Null string value "NULL" checks for all columns (only varchar data type columns) 
+-----------------------------------------------------------------------------------------
+SELECT
+    SUM(CASE WHEN FULLNAME = 'NULL' THEN 1 ELSE 0 END) AS NULL_COUNT_FULLNAME,
+    SUM(CASE WHEN PREFERREDNAME = 'NULL' THEN 1 ELSE 0 END) AS NULL_COUNT_PREFERREDNAME,
+    SUM(CASE WHEN SEARCHNAME = 'NULL' THEN 1 ELSE 0 END) AS NULL_COUNT_SEARCHNAME
+FROM KN_LOGISTICS.SNOWSQL.APPLICATION_PEOPLE;
+
+-----------------------------------------------------------------------------------------
+// Null value checks for actual null values
+-----------------------------------------------------------------------------------------
+SELECT 
+    COUNT(CASE WHEN FULLNAME IS NULL THEN 1 END) AS count_FULLNAME_NULL,
+    COUNT(CASE WHEN PREFERREDNAME IS NULL THEN 1 END) AS count_PREFERREDNAME_NULL,
+    COUNT(CASE WHEN SEARCHNAME IS NULL THEN 1 END) AS count_SEARCHNAME_NULL
+FROM KN_LOGISTICS.SNOWSQL.APPLICATION_PEOPLE;
+
+-----------------------------------------------------------------------------------------
+// convert "NULL" string values into actual null values (DONT RUN YET)
+-----------------------------------------------------------------------------------------
+UPDATE KN_LOGISTICS.SNOWSQL.APPLICATION_PEOPLE
+SET PERSONID = NULL
+WHERE PERSONID = 'NULL';
+
+UPDATE KN_LOGISTICS.SNOWSQL.APPLICATION_PEOPLE
+SET FULLNAME = NULL
+WHERE FULLNAME = 'NULL';
+
+UPDATE KN_LOGISTICS.SNOWSQL.APPLICATION_PEOPLE
+SET PREFERREDNAME = NULL
+WHERE PREFERREDNAME = 'NULL';
+
+UPDATE KN_LOGISTICS.SNOWSQL.APPLICATION_PEOPLE
+SET SEARCHNAME = NULL
+WHERE SEARCHNAME = 'NULL';
+
+UPDATE KN_LOGISTICS.SNOWSQL.APPLICATION_PEOPLE
+SET ISEMPLOYEE = NULL
+WHERE ISEMPLOYEE = 'NULL';
+
+UPDATE KN_LOGISTICS.SNOWSQL.APPLICATION_PEOPLE
+SET ISSALESPERSON = NULL
+WHERE ISSALESPERSON = 'NULL';
+
+
+-----------------------------------------------------------------------------------------
+//check for duplicates
+-----------------------------------------------------------------------------------------
+SELECT PERSONID, FULLNAME, PREFERREDNAME, SEARCHNAME, COUNT(*) AS count
+FROM KN_LOGISTICS.SNOWSQL.APPLICATION_PEOPLE
+GROUP BY PERSONID, FULLNAME, PREFERREDNAME, SEARCHNAME
+HAVING COUNT(*) > 1;
+
+-----------------------------------------------------------------------------------------
+// validate foreign keys with JOINS
+-----------------------------------------------------------------------------------------
+// no need
+
+
+---------------------------------------------
+// data type conversion (to number): PERSONID
+---------------------------------------------
+// PERSONID
+ALTER TABLE KN_LOGISTICS.SNOWSQL.APPLICATION_PEOPLE
+ADD COLUMN PERSONID_NUM NUMBER(38,0);
+
+UPDATE KN_LOGISTICS.SNOWSQL.APPLICATION_PEOPLE
+SET PERSONID_NUM = TO_NUMBER(PERSONID);
+
+SELECT PERSONID, PERSONID_NUM
+FROM KN_LOGISTICS.SNOWSQL.APPLICATION_PEOPLE;
+
+ALTER TABLE KN_LOGISTICS.SNOWSQL.APPLICATION_PEOPLE
+DROP COLUMN PERSONID;
+
+ALTER TABLE KN_LOGISTICS.SNOWSQL.APPLICATION_PEOPLE
+RENAME COLUMN PERSONID_NUM TO PERSONID;
+// Check 10 rows of SUPPLIERID after updating the data type
+SELECT PERSONID FROM KN_LOGISTICS.SNOWSQL.APPLICATION_PEOPLE LIMIT 10;
+
+// Check 10 rows of the whole table after updating the data type
+SELECT * FROM KN_LOGISTICS.SNOWSQL.APPLICATION_PEOPLE;
+
+--------------------------------------------------
+// data type conversion (to timestamp)
+--------------------------------------------------
+// no need
+
+--------------------------------------------------
+// data type conversion (to date)
+--------------------------------------------------
+// no need
+
+--------------------------------------------------
+// data type conversion (to boolean): ISEMPLOYEE, ISSALESPERSON
+--------------------------------------------------
+// ISEMPLOYEE
+ALTER TABLE KN_LOGISTICS.SNOWSQL.APPLICATION_PEOPLE
+ADD COLUMN ISEMPLOYEE_BOOL BOOLEAN;
+
+UPDATE KN_LOGISTICS.SNOWSQL.APPLICATION_PEOPLE
+SET ISEMPLOYEE_BOOL = TO_BOOLEAN(ISEMPLOYEE);
+
+SELECT ISEMPLOYEE, ISEMPLOYEE_BOOL
+FROM KN_LOGISTICS.SNOWSQL.APPLICATION_PEOPLE;
+
+ALTER TABLE KN_LOGISTICS.SNOWSQL.APPLICATION_PEOPLE
+DROP COLUMN ISEMPLOYEE;
+
+ALTER TABLE KN_LOGISTICS.SNOWSQL.APPLICATION_PEOPLE
+RENAME COLUMN ISEMPLOYEE_BOOL TO ISEMPLOYEE;
+// Check 10 rows of SUPPLIERID after updating the data type
+SELECT ISEMPLOYEE FROM KN_LOGISTICS.SNOWSQL.APPLICATION_PEOPLE LIMIT 10;
+
+// Check 10 rows of the whole table after updating the data type
+SELECT * FROM KN_LOGISTICS.SNOWSQL.APPLICATION_PEOPLE;
+
+// ISSALESPERSON
+ALTER TABLE KN_LOGISTICS.SNOWSQL.APPLICATION_PEOPLE
+ADD COLUMN ISSALESPERSON_BOOL BOOLEAN;
+
+UPDATE KN_LOGISTICS.SNOWSQL.APPLICATION_PEOPLE
+SET ISSALESPERSON_BOOL = TO_BOOLEAN(ISSALESPERSON);
+
+SELECT ISSALESPERSON, ISSALESPERSON_BOOL
+FROM KN_LOGISTICS.SNOWSQL.APPLICATION_PEOPLE;
+
+ALTER TABLE KN_LOGISTICS.SNOWSQL.APPLICATION_PEOPLE
+DROP COLUMN ISSALESPERSON;
+
+ALTER TABLE KN_LOGISTICS.SNOWSQL.APPLICATION_PEOPLE
+RENAME COLUMN ISSALESPERSON_BOOL TO ISSALESPERSON;
+// Check 10 rows of SUPPLIERID after updating the data type
+SELECT ISSALESPERSON FROM KN_LOGISTICS.SNOWSQL.APPLICATION_PEOPLE LIMIT 10;
+
+// Check 10 rows of the whole table after updating the data type
+SELECT * FROM KN_LOGISTICS.SNOWSQL.APPLICATION_PEOPLE;
+
+
