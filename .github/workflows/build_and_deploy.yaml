@@ -9,8 +9,8 @@ on:
     branches:
       - main  # Trigger on pull requests targeting the main branch
   workflow_dispatch:  # Allows manual triggering from GitHub UI
-  #schedule:
-    #- cron: "*/5 * * * *"  # Optionally, run every 5 minutes (UTC time)
+  schedule:
+    - cron: "0 0 * * *"  # Optional: Run daily at midnight UTC
 
 permissions:
   contents: read
@@ -39,7 +39,7 @@ jobs:
           pip install nbconvert  # For executing Jupyter notebooks
           pip install jupyter
 
-      # Step 4: Execute Jupyter Notebook without saving output.
+      # Step 4: Execute Jupyter Notebook.
       - name: Execute Jupyter Notebook
         env:
           SNOWFLAKE_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
@@ -48,4 +48,4 @@ jobs:
           SNOWFLAKE_DATABASE: ${{ secrets.SNOWFLAKE_DATABASE }}
           SNOWFLAKE_SCHEMA: ${{ secrets.SNOWFLAKE_SCHEMA }}
         run: |
-          jupyter nbconvert --to notebook --execute notebook/snowpark_notebook.ipynb --stdout > /dev/null
+          jupyter nbconvert --to notebook --execute notebook/snowpark_notebook.ipynb --output notebook/output_snowpark_notebook.ipynb
