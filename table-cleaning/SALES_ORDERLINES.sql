@@ -1,0 +1,67 @@
+
+--1. Check for NULL values in the primary key
+SELECT *
+FROM SALES_ORDERLINES
+WHERE orderlineid IS NULL;
+--if query preoduces no results, primary key has no null values
+
+
+-- 2. Check for uniqueness of unique columns
+SELECT _, COUNT(*)
+FROM SALES_ORDERLINES
+GROUP BY _
+HAVING COUNT(*) > 1;
+--If query returns with no results, it means that the column is unique (no duplicate values)
+--since this table doesnt have any unique columns, this query was not used
+
+
+
+-- 3. Check for null values in each column 
+-- Null value checks for all columns in SALES_ORDERLINES
+SELECT 
+    COUNT(CASE WHEN ORDERID IS NULL THEN 1 END) AS count_ORDERID_NULL,
+    COUNT(CASE WHEN STOCKITEMID IS NULL THEN 1 END) AS count_STOCKITEMID_NULL,
+    COUNT(CASE WHEN DESCRIPTION IS NULL THEN 1 END) AS count_DESCRIPTION_NULL,
+    COUNT(CASE WHEN PACKAGETYPEID IS NULL THEN 1 END) AS count_PACKAGETYPEID_NULL,
+    COUNT(CASE WHEN QUANTITY IS NULL THEN 1 END) AS count_QUANTITY_NULL,
+    COUNT(CASE WHEN UNITPRICE IS NULL THEN 1 END) AS count_UNITPRICE_NULL,
+    COUNT(CASE WHEN TAXRATE IS NULL THEN 1 END) AS count_TAXRATE_NULL,
+    COUNT(CASE WHEN PICKEDQUANTITY IS NULL THEN 1 END) AS count_PICKEDQUANTITY_NULL,
+    COUNT(CASE WHEN PICKINGCOMPLETEDWHEN IS NULL THEN 1 END) AS count_PICKINGCOMPLETEDWHEN_NULL
+FROM KN_LOGISTICS.SNOWSQL.SALES_ORDERLINES;
+--pickingcompletedwhen has 3147 null values 
+
+
+-- 4. Validate consistent data types for primary and foreign keys
+-- Validate FK: PACKAGETYPEID in SALES_ORDERLINES
+SELECT DISTINCT so.PACKAGETYPEID AS Invalid_PACKAGETYPEID
+FROM KN_LOGISTICS.SNOWSQL.SALES_ORDERLINES so
+LEFT JOIN KN_LOGISTICS.SNOWSQL.WAREHOUSE_PACKAGETYPES wp
+    ON so.PACKAGETYPEID = wp.PACKAGETYPEID
+WHERE wp.PACKAGETYPEID IS NULL;
+
+-- Validate FK: ORDERID in SALES_ORDERLINES
+SELECT DISTINCT so.ORDERID AS Invalid_ORDERID
+FROM KN_LOGISTICS.SNOWSQL.SALES_ORDERLINES so
+LEFT JOIN KN_LOGISTICS.SNOWSQL.SALES_ORDERS o
+    ON so.ORDERID = o.ORDERID
+WHERE o.ORDERID IS NULL;
+
+-- Validate FK: STOCKITEMID in SALES_ORDERLINES
+SELECT DISTINCT so.STOCKITEMID AS Invalid_STOCKITEMID
+FROM KN_LOGISTICS.SNOWSQL.SALES_ORDERLINES so
+LEFT JOIN KN_LOGISTICS.SNOWSQL.WAREHOUSE_STOCKITEMS si
+    ON so.STOCKITEMID = si.STOCKITEMID
+WHERE si.STOCKITEMID IS NULL;
+
+--If query/queries produce no results, it means that the primary and foreign keys have the same datatype
+
+--5. Check for duplicate rows in the table 
+-- check for duplicates in unique column in WAREHOUSE_COLORS
+SELECT ORDERLINEID, COUNT(*)
+FROM KN_LOGISTICS.SNOWSQL.SALES_ORDERLINES
+GROUP BY ORDERLINEID
+HAVING COUNT(*) > 1;
+--if query produces no results, there are no duplicate rows in the table
+
+
