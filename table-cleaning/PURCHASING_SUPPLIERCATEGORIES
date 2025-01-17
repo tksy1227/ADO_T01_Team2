@@ -1,0 +1,44 @@
+create or replace TABLE KN_LOGISTICS.SNOWSQL.PURCHASING_SUPPLIERCATEGORIES (
+	SUPPLIERCATEGORYID NUMBER(38,0),
+	SUPPLIERCATEGORYNAME VARCHAR(16777216),
+	constraint PK_PURCHASING_SUPPLIERCATEGORIE primary key (SUPPLIERCATEGORYID)
+);
+
+--------------------------------------------------
+// Null string value "NULL" checks for all columns (only varchar data type columns)
+--------------------------------------------------
+SELECT
+    SUM(CASE WHEN SUPPLIERCATEGORYNAME = 'NULL' THEN 1 ELSE 0 END) AS NULL_COUNT_SUPPLIERCATEGORYNAME
+FROM 
+    KN_LOGISTICS.SNOWSQL.PURCHASING_SUPPLIERCATEGORIES;
+
+--------------------------------------------------
+// Null value checks for actual null values
+--------------------------------------------------
+SELECT 
+    COUNT(CASE WHEN SUPPLIERCATEGORYID IS NULL THEN 1 END) AS count_SUPPLIERCATEGORYID_NULL,
+    COUNT(CASE WHEN SUPPLIERCATEGORYNAME IS NULL THEN 1 END) AS count_SUPPLIERCATEGORYNAME_NULL
+FROM 
+    KN_LOGISTICS.SNOWSQL.PURCHASING_SUPPLIERCATEGORIES;
+
+--------------------------------------------------
+// Convert "NULL" string values into actual null values
+--------------------------------------------------
+-- NA
+
+--------------------------------------------------
+// Check for duplicates
+--------------------------------------------------
+SELECT SUPPLIERCATEGORYID, COUNT(*) AS count
+FROM KN_LOGISTICS.SNOWSQL.PURCHASING_SUPPLIERCATEGORIES
+GROUP BY SUPPLIERCATEGORYID
+HAVING COUNT(*) > 1;
+
+--------------------------------------------------
+// Check 10 rows after applying data quality checks
+--------------------------------------------------
+SELECT * 
+FROM KN_LOGISTICS.SNOWSQL.PURCHASING_SUPPLIERCATEGORIES;
+
+
+
