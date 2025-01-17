@@ -47,5 +47,5 @@ jobs:
           SNOWFLAKE_PASSWORD: ${{ secrets.SNOWFLAKE_PASSWORD }}
           SNOWFLAKE_DATABASE: ${{ secrets.SNOWFLAKE_DATABASE }}
           SNOWFLAKE_SCHEMA: ${{ secrets.SNOWFLAKE_SCHEMA }}
-        run: |
-          jupyter nbconvert --to notebook --execute notebook/snowpark_notebook.ipynb --output notebook/output_snowpark_notebook.ipynb
+        #run: |
+         # jupyter nbconvert --to notebook --execute notebook/snowpark_notebook.ipynb --output notebook/output_snowpark_notebook.ipynb
