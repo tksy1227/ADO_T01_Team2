@@ -247,8 +247,6 @@ SELECT
 FROM KN_LOGISTICS.SNOWSQL.SALES_CUSTOMERS
 LIMIT 10;
 
-select * from SALES_CUSTOMERS LIMIT 20
-
 
 --------------------------------------------------
 --Adding of primary key into the table
