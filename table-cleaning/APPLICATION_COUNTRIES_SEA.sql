@@ -1,91 +1,10 @@
-create or replace TABLE KN_LOGISTICS.SNOWSQL.APPLICATION_COUNTRIES_SEA (
-	COUNTRYID NUMBER(38,0) NOT NULL,
-	COUNTRYNAME VARCHAR(60),
-	FORMALNAME VARCHAR(60),
-	LATESTRECORDEDPOPULATION NUMBER(38,0),
-	CONTINENT VARCHAR(30),
-	REGION VARCHAR(30),
-	SUBREGION VARCHAR(30),
-	constraint UK_APPLICATION_COUNTRIES_SEA_COUNTRYNAME_FORMALNAME unique (COUNTRYNAME, FORMALNAME),
-	constraint PK_APPLICATION_COUNTRIES_SEA primary key (COUNTRYID)
-);
-
-
-ALTER TABLE KN_LOGISTICS.SNOWSQL.APPLICATION_COUNTRIES_SEA
-ADD CONSTRAINT PK_APPLICATION_COUNTRIES_SEA_COUNTRYID
-PRIMARY KEY (COUNTRYID);
-
-
------------------------------------------------------------------------------------------
-// Null string value "NULL" checks for all columns (only varchar data type columns) 
------------------------------------------------------------------------------------------
-SELECT
-    SUM(CASE WHEN COUNTRYNAME = 'NULL' THEN 1 ELSE 0 END) AS NULL_COUNT_COUNTRYNAME,
-    SUM(CASE WHEN FORMALNAME = 'NULL' THEN 1 ELSE 0 END) AS NULL_COUNT_FORMALNAME,
-    SUM(CASE WHEN CONTINENT = 'NULL' THEN 1 ELSE 0 END) AS NULL_COUNT_CONTINENT,
-    SUM(CASE WHEN REGION = 'NULL' THEN 1 ELSE 0 END) AS NULL_COUNT_REGION,
-    SUM(CASE WHEN SUBREGION = 'NULL' THEN 1 ELSE 0 END) AS NULL_COUNT_SUBREGION
+-- Verify the clean table
+SELECT *
 FROM KN_LOGISTICS.SNOWSQL.APPLICATION_COUNTRIES_SEA;
 
------------------------------------------------------------------------------------------
-// Null value checks for actual null values
------------------------------------------------------------------------------------------
-SELECT 
-    COUNT(CASE WHEN COUNTRYNAME IS NULL THEN 1 END) AS count_COUNTRYNAME_NULL,
-    COUNT(CASE WHEN FORMALNAME IS NULL THEN 1 END) AS count_FORMALNAME_NULL,
-    COUNT(CASE WHEN CONTINENT IS NULL THEN 1 END) AS count_CONTINENT_NULL,
-    COUNT(CASE WHEN REGION IS NULL THEN 1 END) AS count_REGION_NULL,
-    COUNT(CASE WHEN SUBREGION IS NULL THEN 1 END) AS count_SUBREGION_NULL
-FROM KN_LOGISTICS.SNOWSQL.APPLICATION_COUNTRIES_SEA;
-
------------------------------------------------------------------------------------------
-// convert "NULL" string values into actual null values (DONT RUN YET)
------------------------------------------------------------------------------------------
-UPDATE KN_LOGISTICS.SNOWSQL.APPLICATION_COUNTRIES_SEA
-SET COUNTRYID = NULL
-WHERE COUNTRYID = 'NULL';
-
-UPDATE KN_LOGISTICS.SNOWSQL.APPLICATION_COUNTRIES_SEA
-SET COUNTRYNAME = NULL
-WHERE COUNTRYNAME = 'NULL';
-
-UPDATE KN_LOGISTICS.SNOWSQL.APPLICATION_COUNTRIES_SEA
-SET FORMALNAME = NULL
-WHERE FORMALNAME = 'NULL';
-
-UPDATE KN_LOGISTICS.SNOWSQL.APPLICATION_COUNTRIES_SEA
-SET LATESTRECORDEDPOPULATION = NULL
-WHERE LATESTRECORDEDPOPULATION = 'NULL';
-
-UPDATE KN_LOGISTICS.SNOWSQL.APPLICATION_COUNTRIES_SEA
-SET CONTINENT = NULL
-WHERE CONTINENT = 'NULL';
-
-UPDATE KN_LOGISTICS.SNOWSQL.APPLICATION_COUNTRIES_SEA
-SET REGION = NULL
-WHERE REGION = 'NULL';
-
-UPDATE KN_LOGISTICS.SNOWSQL.APPLICATION_COUNTRIES_SEA
-SET SUBREGION = NULL
-WHERE SUBREGION = 'NULL';
-
------------------------------------------------------------------------------------------
-//check for duplicates
------------------------------------------------------------------------------------------
-SELECT COUNTRYID, COUNTRYNAME, FORMALNAME, COUNT(*) AS count
-FROM KN_LOGISTICS.SNOWSQL.APPLICATION_COUNTRIES_SEA
-GROUP BY COUNTRYID, COUNTRYNAME, FORMALNAME
-HAVING COUNT(*) > 1;
-
------------------------------------------------------------------------------------------
-// validate foreign keys with JOINS
------------------------------------------------------------------------------------------
-// no need
-
-
----------------------------------------------
-// data type conversion (to number): CITYID, STATEPROVINCEID, LATITUDE, LONGITUDE, LATESTRECORDEDPOPULATION
----------------------------------------------
+--------------------------------------------------------------
+--CONVERSION OF DATATYPES 
+--------------------------------------------------------------
 //COUNTRYID
 ALTER TABLE KN_LOGISTICS.SNOWSQL.APPLICATION_COUNTRIES_SEA
 ADD COLUMN COUNTRYID_NUM NUMBER(38,0);
@@ -125,13 +44,58 @@ RENAME COLUMN LATESTRECORDEDPOPULATION_NUM TO LATESTRECORDEDPOPULATION;
 // Check 10 rows of SUPPLIERID after updating the data type
 SELECT LATESTRECORDEDPOPULATION FROM KN_LOGISTICS.SNOWSQL.APPLICATION_COUNTRIES_SEA LIMIT 10;
 
---------------------------------------------------
-// data type conversion (to timestamp)
---------------------------------------------------
-// no need
 
---------------------------------------------------
-// data type conversion (to date)
---------------------------------------------------
-// no need
+--------------------------------------------------------------
+--ADDING OF PRIMARY KEYS TO TABLE
+--------------------------------------------------------------
+
+ALTER TABLE KN_LOGISTICS.SNOWSQL.APPLICATION_COUNTRIES_SEA
+ADD CONSTRAINT PK_APPLICATION_COUNTRIES_SEA_COUNTRYID
+PRIMARY KEY (COUNTRYID);
+
+--------------------------------------------------------------
+--Adding of unique key to table
+--------------------------------------------------------------
+ALTER TABLE KN_LOGISTICS.SNOWSQL.APPLICATION_COUNTRIES_SEA
+ADD CONSTRAINT UK_APPLICATION_COUNTRIES_SEA_COUNTRYNAME
+UNIQUE (COUNTRYNAME);
+
+ALTER TABLE KN_LOGISTICS.SNOWSQL.APPLICATION_COUNTRIES_SEA
+ADD CONSTRAINT UK_APPLICATION_COUNTRIES_SEA_FORMALNAME
+UNIQUE (FORMALNAME);
+
+-------------------------------------------------------
+--ERROR HANDLING
+-------------------------------------------------------
+WITH CTE AS (
+    SELECT 
+        COUNTRYNAME,
+        FORMALNAME,
+        CONTINENT,
+        REGION,
+        SUBREGION,
+        COUNTRYID,
+        LATESTRECORDEDPOPULATION,
+        LAG(COUNTRYID) OVER (ORDER BY COUNTRYID) AS prev_countryid,
+        ROW_NUMBER() OVER (ORDER BY COUNTRYID) AS row_num
+    FROM KN_LOGISTICS.SNOWSQL.APPLICATION_COUNTRIES_SEA
+)
+SELECT 
+    COUNTRYNAME,
+    FORMALNAME,
+    CONTINENT,
+    REGION,
+    SUBREGION,
+    CASE
+        WHEN COUNTRYID IS NULL THEN prev_countryid + 1
+        ELSE COUNTRYID
+    END AS COUNTRYID,
+    LATESTRECORDEDPOPULATION
+FROM CTE
+ORDER BY row_num;
+
+-------------------------------------------------------
+--Adding of foreign key to table
+-------------------------------------------------------
+--THERE ARE NO FOREIGN KEYS FOR THIS TABLE
 
