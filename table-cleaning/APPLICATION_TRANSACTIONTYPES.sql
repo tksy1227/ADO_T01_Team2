@@ -1,61 +1,16 @@
-create or replace TABLE KN_LOGISTICS.SNOWSQL.APPLICATION_TRANSACTIONTYPES (
-	TRANSACTIONTYPEID NUMBER(38,0) NOT NULL,
-	TRANSACTIONTYPENAME VARCHAR(50),
-	constraint UK_APPLICATION_TRANSACTIONTYPES_TRANSACTIONTYPENAME unique (TRANSACTIONTYPENAME),
-	constraint PK_APPLICATION_TRANSACTIONTYPES primary key (TRANSACTIONTYPEID)
-);
-
-ALTER TABLE KN_LOGISTICS.SNOWSQL.APPLICATION_TRANSACTIONTYPES
-ADD CONSTRAINT PK_APPLICATION_TRANSACTIONTYPES_TRANSACTIONTYPEID
-PRIMARY KEY (TRANSACTIONTYPEID);
-
------------------------------------------------------------------------------------------
-// Null string value "NULL" checks for all columns (only varchar data type columns) 
------------------------------------------------------------------------------------------
+-- Create a clean table with the same structure as the raw table
+CREATE OR REPLACE TABLE KN_LOGISTICS.SNOWSQL.APPLICATION_TRANSACTIONTYPES AS
 SELECT
-    SUM(CASE WHEN TRANSACTIONTYPENAME = 'NULL' THEN 1 ELSE 0 END) AS NULL_COUNT_TRANSACTIONTYPENAME
+  CAST(CASE WHEN TRANSACTIONTYPEID = 'NULL' THEN NULL ELSE TRANSACTIONTYPEID END AS VARCHAR(38)) AS TRANSACTIONTYPEID,
+  CAST(CASE WHEN TRANSACTIONTYPENAME = 'NULL' THEN NULL ELSE TRANSACTIONTYPENAME END AS VARCHAR(50)) AS TRANSACTIONTYPENAME
+FROM KN_LOGISTICS.SNOWSQL.APPLICATION_TRANSACTIONTYPES_RAW;
+
+-- Verify the clean table
+SELECT *
 FROM KN_LOGISTICS.SNOWSQL.APPLICATION_TRANSACTIONTYPES;
-
------------------------------------------------------------------------------------------
-// Null value checks for actual null values
------------------------------------------------------------------------------------------
-SELECT 
-    COUNT(CASE WHEN TRANSACTIONTYPEID IS NULL THEN 1 END) AS COUNT_TRANSACTIONTYPEID_NULL,
-    COUNT(CASE WHEN TRANSACTIONTYPENAME IS NULL THEN 1 END) AS COUNT_TRANSACTIONTYPENAME_NULL
-FROM KN_LOGISTICS.SNOWSQL.APPLICATION_TRANSACTIONTYPES;
-
-
------------------------------------------------------------------------------------------
-// convert "NULL" string values into actual null values (DONT RUN YET)
------------------------------------------------------------------------------------------
-UPDATE KN_LOGISTICS.SNOWSQL.APPLICATION_TRANSACTIONTYPES
-SET TRANSACTIONTYPEID = NULL
-WHERE TRANSACTIONTYPEID = 'NULL';
-
-UPDATE KN_LOGISTICS.SNOWSQL.APPLICATION_TRANSACTIONTYPES
-SET TRANSACTIONTYPENAME = NULL
-WHERE TRANSACTIONTYPENAME = 'NULL';
-
------------------------------------------------------------------------------------------
-//check for duplicates
------------------------------------------------------------------------------------------
-SELECT TRANSACTIONTYPEID, TRANSACTIONTYPENAME, COUNT(*) AS DUPLICATE_COUNT
-FROM KN_LOGISTICS.SNOWSQL.APPLICATION_TRANSACTIONTYPES
-GROUP BY TRANSACTIONTYPEID, TRANSACTIONTYPENAME
-HAVING COUNT(*) > 1;
-
------------------------------------------------------------------------------------------
-// validate foreign keys with JOINS
------------------------------------------------------------------------------------------
-SELECT DISTINCT s.COUNTRYID
-FROM KN_LOGISTICS.SNOWSQL.APPLICATION_STATEPROVINCES s
-LEFT JOIN KN_LOGISTICS.SNOWSQL.APPLICATION_COUNTRIES_SEA c
-    ON s.COUNTRYID = c.COUNTRYID
-WHERE c.COUNTRYID IS NULL;
-
 
 ---------------------------------------------
-// data type conversion (to number): TRANSACTIONTYPEID
+// Data type conversion (to number): TRANSACTIONTYPEID
 ---------------------------------------------
 // TRANSACTIONTYPEID
 ALTER TABLE KN_LOGISTICS.SNOWSQL.APPLICATION_TRANSACTIONTYPES
@@ -78,18 +33,44 @@ SELECT TRANSACTIONTYPEID FROM KN_LOGISTICS.SNOWSQL.APPLICATION_TRANSACTIONTYPES 
 // Check 10 rows of the whole table after updating the data type
 SELECT * FROM KN_LOGISTICS.SNOWSQL.APPLICATION_TRANSACTIONTYPES;
 
---------------------------------------------------
-// data type conversion (to timestamp)
---------------------------------------------------
-// no need
+---------------------------------------------------------------
+--Adding of primary key to table
+---------------------------------------------------------------
+ALTER TABLE KN_LOGISTICS.SNOWSQL.APPLICATION_TRANSACTIONTYPES
+ADD CONSTRAINT PK_APPLICATION_TRANSACTIONTYPES_TRANSACTIONTYPEID
+PRIMARY KEY (TRANSACTIONTYPEID);
 
---------------------------------------------------
-// data type conversion (to date)
---------------------------------------------------
-// no need
+----------------------------------------------------------------
+--Adding of unique key to table
+----------------------------------------------------------------
+ALTER TABLE KN_LOGISTICS.SNOWSQL.APPLICATION_TRANSACTIONTYPES
+ADD CONSTRAINT UK_APPLICATION_TRANSACTIONTYPES_TRANSACTIONTYPENAME
+UNIQUE (TRANSACTIONTYPENAME);
 
---------------------------------------------------
-// data type conversion (to boolean)
---------------------------------------------------
-// no need
+-------------------------------------------------------
+-- ERROR HANDLING
+-------------------------------------------------------
+WITH CTE AS (
+    SELECT 
+        TRANSACTIONTYPEID,
+        TRANSACTIONTYPENAME,
+        LAG(TRANSACTIONTYPEID) OVER (ORDER BY TRANSACTIONTYPEID) AS prev_transactiontypeid,
+        ROW_NUMBER() OVER (ORDER BY TRANSACTIONTYPEID) AS row_num
+    FROM KN_LOGISTICS.SNOWSQL.APPLICATION_TRANSACTIONTYPES
+)
+SELECT 
+    TRANSACTIONTYPENAME,
+    CASE
+        WHEN TRANSACTIONTYPEID IS NULL THEN prev_transactiontypeid + 1
+        ELSE TRANSACTIONTYPEID
+    END AS TRANSACTIONTYPEID
+FROM CTE
+ORDER BY row_num;
+
+
+
+-------------------------------------------------------
+--Adding of foreign key to table
+-------------------------------------------------------
+-- THERE IS NO FOREIGN KEY IN THIS TABLE
 
