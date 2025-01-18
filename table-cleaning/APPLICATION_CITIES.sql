@@ -1,92 +1,11 @@
-create or replace TABLE KN_LOGISTICS.SNOWSQL.APPLICATION_CITIES (
-	CITYID NUMBER(38,0) NOT NULL,
-	CITYNAME VARCHAR(50),
-	COUNTRYID NUMBER(38,0),
-	LATITUDE NUMBER(38,0),
-	LONGITUDE NUMBER(38,0),
-	LATESTRECORDEDPOPULATION NUMBER(38,0),
-	-- constraint UQ_APPLICATION_CITIES_CITYNAME unique (CITYNAME),
-	constraint PK_APPLICATION_CITIES primary key (CITYID),
-    -- put in code constraint for STATEPROVINCEID foreign key 
-    -- Application.Cities.COUNTRYID = Application.StateProvinces.COUNTRYID
-    constraint FK_COUNTRYID foreign key (COUNTRYID) references KN_LOGISTICS.SNOWSQL.APPLICATION_COUNTRIES_SEA (COUNTRYID)
-);
 
-ALTER TABLE KN_LOGISTICS.SNOWSQL.APPLICATION_CITIES
-ADD CONSTRAINT PK_APPLICATION_CITIES_CITYID
-PRIMARY KEY (CITYID);
-
------------------------------------------------------------------------------------------
-// Null string value "NULL" checks for all columns (only varchar data type columns) 
------------------------------------------------------------------------------------------
-SELECT
-    SUM(CASE WHEN CITYNAME = 'NULL' THEN 1 ELSE 0 END) AS NULL_COUNT_CITYNAME,
-    SUM(CASE WHEN COUNTRYID = 'NULL' THEN 1 ELSE 0 END) AS NULL_COUNT_COUNTRYID,
-    SUM(CASE WHEN LATITUDE = 'NULL' THEN 1 ELSE 0 END) AS NULL_COUNT_LATITUDE,
-    SUM(CASE WHEN LONGITUDE = 'NULL' THEN 1 ELSE 0 END) AS NULL_COUNT_LONGITUDE,
-    SUM(CASE WHEN LATESTRECORDEDPOPULATION = 'NULL' THEN 1 ELSE 0 END) AS NULL_COUNT_LATESTRECORDEDPOPULATION
+-- Verify the clean table
+SELECT *
 FROM KN_LOGISTICS.SNOWSQL.APPLICATION_CITIES;
 
------------------------------------------------------------------------------------------
-// Null value checks for actual null values
------------------------------------------------------------------------------------------
-SELECT 
-    COUNT(CASE WHEN CITYNAME IS NULL THEN 1 END) AS count_CITYNAME_NULL,
-    COUNT(CASE WHEN COUNTRYID IS NULL THEN 1 END) AS count_COUNTRYID_NULL,
-    COUNT(CASE WHEN LATITUDE IS NULL THEN 1 END) AS count_LATITUDE_NULL,
-    COUNT(CASE WHEN LONGITUDE IS NULL THEN 1 END) AS count_LONGITUDE_NULL,
-    COUNT(CASE WHEN LATESTRECORDEDPOPULATION IS NULL THEN 1 END) AS count_LATESTRECORDEDPOPULATION_NULL
-FROM KN_LOGISTICS.SNOWSQL.APPLICATION_CITIES;
-
------------------------------------------------------------------------------------------
-// convert "NULL" string values into actual null values (DONT RUN YET)
------------------------------------------------------------------------------------------
-UPDATE KN_LOGISTICS.SNOWSQL.APPLICATION_CITIES
-SET CITYID = NULL
-WHERE CITYID = 'NULL';
-
-UPDATE KN_LOGISTICS.SNOWSQL.APPLICATION_CITIES
-SET CITYNAME = NULL
-WHERE CITYNAME = 'NULL';
-
-UPDATE KN_LOGISTICS.SNOWSQL.APPLICATION_CITIES
-SET COUNTRYID = NULL
-WHERE COUNTRYID = 'NULL';
-
-UPDATE KN_LOGISTICS.SNOWSQL.APPLICATION_CITIES
-SET LATITUDE = NULL
-WHERE LATITUDE = 'NULL';
-
-UPDATE KN_LOGISTICS.SNOWSQL.APPLICATION_CITIES
-SET LONGITUDE = NULL
-WHERE LONGITUDE = 'NULL';
-
-UPDATE KN_LOGISTICS.SNOWSQL.APPLICATION_CITIES
-SET LATESTRECORDEDPOPULATION = NULL
-WHERE LATESTRECORDEDPOPULATION = 'NULL';
-
-
------------------------------------------------------------------------------------------
-//check for duplicates
------------------------------------------------------------------------------------------
-SELECT CITYNAME, COUNT(*) AS count
-FROM KN_LOGISTICS.SNOWSQL.APPLICATION_CITIES
-GROUP BY CITYNAME
-HAVING COUNT(*) > 1;
-
------------------------------------------------------------------------------------------
-// validate foreign keys with JOINS
------------------------------------------------------------------------------------------
-SELECT DISTINCT t.COUNTRYID
-FROM KN_LOGISTICS.SNOWSQL.APPLICATION_CITIES t
-LEFT JOIN KN_LOGISTICS.SNOWSQL.APPLICATION_COUNTRIES_SEA i
-    ON t.COUNTRYID = i.COUNTRYID
-WHERE i.COUNTRYID IS NULL;
-
-
----------------------------------------------
-// data type conversion (to number): CITYID, COUNTRYID, LATITUDE, LONGITUDE, LATESTRECORDEDPOPULATION
----------------------------------------------
+--------------------------------------------------------------
+--CONVERSION OF DATATYPES 
+--------------------------------------------------------------
 // CITYID
 ALTER TABLE KN_LOGISTICS.SNOWSQL.APPLICATION_CITIES
 ADD COLUMN CITYID_NUM NUMBER(38,0);
@@ -113,7 +32,7 @@ ALTER TABLE KN_LOGISTICS.SNOWSQL.APPLICATION_CITIES
 ADD COLUMN COUNTRYID_NUM NUMBER(38,0);
 
 UPDATE KN_LOGISTICS.SNOWSQL.APPLICATION_CITIES
-SET COUNTRYID_NUM = TO_NUMBER(STATEPROVINCEID);
+SET COUNTRYID_NUM = TO_NUMBER(COUNTRYID);
 
 SELECT COUNTRYID, COUNTRYID_NUM
 FROM KN_LOGISTICS.SNOWSQL.APPLICATION_CITIES;
@@ -180,13 +99,51 @@ RENAME COLUMN LATESTRECORDEDPOPULATION_NUM TO LATESTRECORDEDPOPULATION;
 // Check 10 rows of SUPPLIERID after updating the data type
 SELECT LATESTRECORDEDPOPULATION FROM KN_LOGISTICS.SNOWSQL.APPLICATION_CITIES LIMIT 10;
 
---------------------------------------------------
-// data type conversion (to timestamp)
---------------------------------------------------
-// no need
+--------------------------------------------------------------
+--ADDING OF PRIMARY KEYS TO TABLE
+--------------------------------------------------------------
+ALTER TABLE KN_LOGISTICS.SNOWSQL.APPLICATION_CITIES
+ADD CONSTRAINT PK_APPLICATION_CITIES_CITYID
+PRIMARY KEY (CITYID);
 
---------------------------------------------------
-// data type conversion (to date)
---------------------------------------------------
-// no need
+--------------------------------------------------------------
+--ERROR HANDLING
+--------------------------------------------------------------
+WITH CTE AS (
+    SELECT 
+        CITYID, 
+        CITYNAME, 
+        COUNTRYID,
+        LATITUDE,
+        LONGITUDE,
+        LATESTRECORDEDPOPULATION,
+        LAG(CITYID) OVER (ORDER BY CITYID) AS prev_cityid,
+        ROW_NUMBER() OVER (ORDER BY CITYID) AS row_num
+    FROM KN_LOGISTICS.SNOWSQL.APPLICATION_CITIES
+)
+SELECT 
+        CITYNAME, 
+        COUNTRYID,
+        LATITUDE,
+        LONGITUDE,
+        LATESTRECORDEDPOPULATION,
+    CASE
+        WHEN CITYID IS NULL THEN prev_cityid + 1
+        ELSE CITYID
+    END AS CITYID
+FROM CTE
+ORDER BY row_num;
+
+
+-------------------------------------------------------
+--Adding of foreign key to table
+-------------------------------------------------------
+
+-- Foreign Key: APPLICATION_CITIES.COUNTRYID -> APPLICATION_COUNTRIES_SEA.COUNTRYID
+ALTER TABLE KN_LOGISTICS.SNOWSQL.APPLICATION_CITIES
+ADD CONSTRAINT FK_APPLICATION_CITIES_COUNTRYID_APPLICATION_COUNTRIES_SEA
+FOREIGN KEY (COUNTRYID)
+REFERENCES KN_LOGISTICS.SNOWSQL.APPLICATION_COUNTRIES_SEA(COUNTRYID);
+
+SELECT * FROM APPLICATION_CITIES LIMIT 20
 
