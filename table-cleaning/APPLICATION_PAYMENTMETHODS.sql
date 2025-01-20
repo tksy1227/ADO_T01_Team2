@@ -1,18 +1,18 @@
 -- Create a clean table with the same structure as the raw table
 CREATE OR REPLACE TABLE KN_LOGISTICS.SNOWSQL.APPLICATION_PAYMENTMETHODS AS
 SELECT
-  CAST(CASE WHEN PAYMENTMETHODID = 'NULL' THEN NULL ELSE PAYMENTMETHODID END AS VARCHAR(20)) AS PAYMENTMETHODID,
+  CAST(CASE WHEN PAYMENTMETHODID = 'NULL' THEN NULL ELSE PAYMENTMETHODID END AS VARCHAR(38)) AS PAYMENTMETHODID,
   CAST(CASE WHEN PAYMENTMETHODNAME = 'NULL' THEN NULL ELSE PAYMENTMETHODNAME END AS VARCHAR(50)) AS PAYMENTMETHODNAME
-FROM KN_LOGISTICS.SNOWSQL.APPLICATION_TRANSACTIONTYPES_RAW;
+FROM KN_LOGISTICS.SNOWSQL.APPLICATION_PAYMENTMETHODS_RAW;
 
 -- Verify the clean table
 SELECT *
 FROM KN_LOGISTICS.SNOWSQL.APPLICATION_PAYMENTMETHODS;
 
------------------------------------------------------------------------------------------
-// Data type conversion (to number): PAYMENTMETHODID
------------------------------------------------------------------------------------------
-// PAYMENTMETHODID
+
+---------------------------------------------
+-- Data type conversion (to number)
+---------------------------------------------
 ALTER TABLE KN_LOGISTICS.SNOWSQL.APPLICATION_PAYMENTMETHODS
 ADD COLUMN PAYMENTMETHODID_NUM NUMBER(38,0);
 
@@ -28,28 +28,24 @@ DROP COLUMN PAYMENTMETHODID;
 ALTER TABLE KN_LOGISTICS.SNOWSQL.APPLICATION_PAYMENTMETHODS
 RENAME COLUMN PAYMENTMETHODID_NUM TO PAYMENTMETHODID;
 
-// Check 10 rows of PAYMENTMETHODID after updating the data type
-SELECT PAYMENTMETHODID FROM KN_LOGISTICS.SNOWSQL.APPLICATION_PAYMENTMETHODS LIMIT 10;
 
-// Check 10 rows of the whole table after updating the data type
-SELECT * FROM KN_LOGISTICS.SNOWSQL.APPLICATION_PAYMENTMETHODS;
-
----------------------------------------------------------------
---Adding of primary key to table
----------------------------------------------------------------
+---------------------------------------------
+---Adding of primary key to table
+---------------------------------------------
 ALTER TABLE KN_LOGISTICS.SNOWSQL.APPLICATION_PAYMENTMETHODS
 ADD CONSTRAINT PK_APPLICATION_PAYMENTMETHODS_PAYMENTMETHODID
 PRIMARY KEY (PAYMENTMETHODID);
 
-----------------------------------------------------------------
+
+----------------------------------------------
 --Adding of unique key to table
-----------------------------------------------------------------
+----------------------------------------------
 ALTER TABLE KN_LOGISTICS.SNOWSQL.APPLICATION_PAYMENTMETHODS
 ADD CONSTRAINT UK_APPLICATION_PAYMENTMETHODS_PAYMENTMETHODNAME
 UNIQUE (PAYMENTMETHODNAME);
 
 -------------------------------------------------------
--- ERROR HANDLING
+--ERROR HANDLING 
 -------------------------------------------------------
 WITH CTE AS (
     SELECT 
@@ -68,7 +64,11 @@ SELECT
 FROM CTE
 ORDER BY row_num;
 
+
 -------------------------------------------------------
 --Adding of foreign key to table
 -------------------------------------------------------
--- THERE IS NO FOREIGN KEY IN THIS TABLE
+--THERE ARE NO FOREIGN KEYS IN THIS TABLE
+
+
+
