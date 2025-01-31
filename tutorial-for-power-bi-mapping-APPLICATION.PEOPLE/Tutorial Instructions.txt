@@ -1,0 +1,1 @@
+For users connecting to Power BI on a new file, please edit the mapping for APPLICATION.PEOPLE according to the images.
