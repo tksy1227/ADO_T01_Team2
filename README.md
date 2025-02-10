@@ -1,7 +1,5 @@
 This repository stores all the content needed to run the CI/CD automation workflow of the overall Snowflake data migration process.
 
-// CURRENTLY WORKFLOW IS PAUSED UNTIL CI/CD IS PROPERLY DEPLOYED //
-
 Folders:
 
 table-creation: Includes SQL codes of the creation of tables as seen in Snowflake.
